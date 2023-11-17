@@ -1,0 +1,75 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: example-app-daniel
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: example-app-daniel
+  template:
+    metadata:
+      labels:
+        app: example-app-daniel
+    spec:
+      containers:
+      - name: example-app-daniel
+        image: fabxc/instrumented_app
+        ports:
+        - name: web
+          containerPort: 8080
+
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: another-example-app-daniel
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: example-app-daniel
+  template:
+    metadata:
+      labels:
+        app: example-app-daniel
+    spec:
+      containers:
+      - name: another-example-app-daniel
+        image: fabxc/instrumented_app
+        ports:
+        - name: web
+          containerPort: 8080
+
+
+---
+
+kind: Service
+apiVersion: v1
+metadata:
+  name: example-app-daniel
+  labels:
+    app: example-app-daniel
+spec:
+  selector:
+    app: example-app-daniel
+  ports:
+  - name: web
+    port: 8080
+
+---
+
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: example-app-daniel
+  labels:
+    team: obs-daniel
+spec:
+  selector:
+    matchLabels:
+      app: example-app-daniel
+  podMetricsEndpoints:
+  - port: web
